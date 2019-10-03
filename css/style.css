@@ -1,0 +1,24 @@
+nav {
+  display: flex;
+  justify-content: space-around;
+}
+
+.container {
+  width: 100vw;
+  background-color: blue;
+}
+
+canvas {
+  border: 25px solid black;
+}
+
+.col {
+  margin: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.col > p {
+  font-size: 30px;
+}

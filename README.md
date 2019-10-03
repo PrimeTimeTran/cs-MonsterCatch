@@ -9,6 +9,7 @@ This is a simple Canvas-based game that requires a solid understanding of the pr
 Here's a walkthrough of implemented user stories.
 
 ![](http://g.recordit.co/cURdPMSHT2.gif)
+[Hi alalal](https://heuristic-turing-5a2c8f.netlify.com/)
 
 ## Code Reviews
 
