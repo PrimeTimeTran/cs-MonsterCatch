@@ -13,7 +13,7 @@ let bgImage, heroImage, monsterImage;
 
 let elapsedTime = 0;
 let startTime = Date.now();
-const SECONDS_PER_ROUND = 20;
+const SECONDS_PER_ROUND = 15;
 
 let score = 0;
 let timer;
@@ -83,14 +83,14 @@ function checkIfHeroCaughtMonster() {
     monsterY <= heroY + 32;
 
   if (heroCaughtMonster) {
-    console.log('heroCaughtMonster')
     score += 1;
     let currentHighScore = localStorage.getItem("highscore");
     currentHighScore = JSON.parse(currentHighScore)
     currentHighScore = currentHighScore && currentHighScore[1] 
-    console.log('currentHighScore', currentHighScore);
-    
-    if (currentHighScore === null || score > currentHighScore) {
+    const newGame = currentHighScore === null
+    const newHighScore = score > currentHighScore
+    const shouldUpdateNewHighScore = newGame || newHighScore
+    if (shouldUpdateNewHighScore) {
       const username = document.getElementById('username').value
       const highscoreInfo = [username, score]
 
@@ -103,10 +103,15 @@ function checkIfHeroCaughtMonster() {
 }
 
 function checkIfOutOfTime(isOutOfTime) {
+  console.log('checkIfOutOfTime'  )
   if (isOutOfTime) {
     clearInterval(timer);
     return;
   }
+}
+
+function stopClock() {
+  clearInterval(timer);
 }
 
 function updateUI() {
@@ -143,6 +148,7 @@ var render = function() {
   const isOutOfTime = SECONDS_PER_ROUND - elapsedTime <= 0;
 
   if (isOutOfTime) {
+    stopClock()
     ctx.fillText(`Hi GAME OVER!!!`, 20, 100);
   } else {
     ctx.fillText(
