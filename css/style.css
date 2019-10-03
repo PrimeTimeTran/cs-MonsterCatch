@@ -22,3 +22,17 @@ canvas {
 .col > p {
   font-size: 30px;
 }
+
+footer {
+  height: 150px;  
+  margin-top: 25%;
+  display: flex;
+  color: white;
+  align-items: center;
+  justify-content: center;
+  background-color: black;
+}
+
+footer > a {
+  margin-left: 10px;
+}
