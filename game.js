@@ -4,48 +4,59 @@ let ctx;
 canvas = document.createElement("canvas");
 ctx = canvas.getContext("2d");
 canvas.width = 512;
-// canvas.width = window.innerWidth
 canvas.height = 480;
 document.body.appendChild(canvas);
+
+let timer;
+let score = 0;
+let keysDown = {};
+let monsterX = 100;
+let monsterY = 100;
+let elapsedTime = 0;
+let heroX = canvas.width / 2;
+let heroY = canvas.height / 2;
+const SECONDS_PER_ROUND = 10;
 
 let bgReady, heroReady, monsterReady;
 let bgImage, heroImage, monsterImage;
 
-let elapsedTime = 0;
-let startTime = Date.now();
-const SECONDS_PER_ROUND = 15;
+const defaultState = {
+  gameStarted: false,
+  currentUser: null,
+  currentHighScore: {
+    user: null,
+    score: null
+  },
+  gameHistory: []
+};
 
-let score = 0;
-let timer;
-
-function onResetGame() {
-  const currentHighScore = localStorage.getItem("highscore");
-  if (score > currentHighScore) {
-    const username = document.getElementById('username').value
-    const highscoreInfo = [username, score]
-    localStorage.setItem("highscore", JSON.stringify(highscoreInfo));
-  }
-  score = 0;
-  elapsedTime = 0;
-  document.getElementById("score").innerHTML = 0;
+function getAppState() {
+  return JSON.parse(localStorage.getItem("appState")) || defaultState;
 }
 
-
-
-let heroX = canvas.width / 2;
-let heroY = canvas.height / 2;
-
-let monsterX = 100;
-let monsterY = 100;
-
-let keysDown = {};
-
+function save(appState) {
+  localStorage.setItem("appState", JSON.stringify(appState));
+}
 
 function randomlyPlace(num) {
   return Math.floor(Math.random() * num);
 }
 
-function moveHeroIfUserIsPressingDownOnTheArrowKeys() {
+function startGame() {
+  const appState = getAppState();
+  appState.currentUser =
+    document.getElementById("username").value || "Anomymous";
+  appState.gameStarted = true;
+  save(appState);
+
+  timer = setInterval(() => {
+    elapsedTime += 1;
+    document.getElementById("timer").innerHTML =
+      SECONDS_PER_ROUND - elapsedTime;
+  }, 1000);
+}
+
+function move() {
   if (38 in keysDown) {
     heroY -= 5;
   }
@@ -60,7 +71,7 @@ function moveHeroIfUserIsPressingDownOnTheArrowKeys() {
   }
 }
 
-function moveHeroToOtherSideIfTheyWentOffScreen() {
+function wrapAround() {
   if (heroX <= 0) {
     heroX = canvas.width - 10;
   }
@@ -75,39 +86,31 @@ function moveHeroToOtherSideIfTheyWentOffScreen() {
   }
 }
 
-function checkIfHeroCaughtMonster() {
+function updateScores() {
+  console.log('updateScores', updateScores)
+  score += 1;
+  const appState = getAppState();
+  const newHighScore = score > appState.currentHighScore.score;
+  if (newHighScore) {
+    appState.currentHighScore = {
+      score: score,
+      user: appState.currentUser || "Anonymous"
+    };
+    save(appState);
+  }
+  monsterX = randomlyPlace(502);
+  monsterY = randomlyPlace(470);
+  document.getElementById("score").innerHTML = score;
+}
+
+function checkMonsterCaught() {
   const heroCaughtMonster =
     heroX <= monsterX + 32 &&
     monsterX <= heroX + 32 &&
     heroY <= monsterY + 32 &&
     monsterY <= heroY + 32;
 
-  if (heroCaughtMonster) {
-    score += 1;
-    let currentHighScore = localStorage.getItem("highscore");
-    currentHighScore = JSON.parse(currentHighScore)
-    currentHighScore = currentHighScore && currentHighScore[1] 
-    const newGame = currentHighScore === null
-    const newHighScore = score > currentHighScore
-    const shouldUpdateNewHighScore = newGame || newHighScore
-    if (shouldUpdateNewHighScore) {
-      const username = document.getElementById('username').value
-      const highscoreInfo = [username, score]
-
-      localStorage.setItem("highscore", JSON.stringify(highscoreInfo));
-    }
-    monsterX = randomlyPlace(502);
-    monsterY = randomlyPlace(470);
-    document.getElementById("score").innerHTML = score;
-  }
-}
-
-function checkIfOutOfTime(isOutOfTime) {
-  console.log('checkIfOutOfTime'  )
-  if (isOutOfTime) {
-    clearInterval(timer);
-    return;
-  }
+  if (heroCaughtMonster) updateScores();
 }
 
 function stopClock() {
@@ -115,24 +118,29 @@ function stopClock() {
 }
 
 function updateUI() {
-  const highScore = localStorage.getItem("highscore");
-  document.getElementById("highscore").innerHTML = highScore;
+  const appState = getAppState();
+  const highScore = appState.currentHighScore.score;
+  const user = appState.currentHighScore.user;
+  document.getElementById("highscore").innerHTML = `${user} : ${highScore}`;
   document.getElementById("timer").innerHTML = SECONDS_PER_ROUND - elapsedTime;
 }
 
-let update = function() {
-  const isOutOfTime = SECONDS_PER_ROUND - elapsedTime <= 0;
-  if (isOutOfTime) return;
-  moveHeroIfUserIsPressingDownOnTheArrowKeys();
-  moveHeroToOtherSideIfTheyWentOffScreen();
-  checkIfHeroCaughtMonster();
-  updateUI();
+const update = function() {
+  const isGameOver = SECONDS_PER_ROUND - elapsedTime <= 0;
+  const appState = getAppState();
+  if (!appState.currentUser) return;
+  if (isGameOver) {
+    appState.gameStarted = false;
+    save(appState);
+    return;
+  }
+  if (appState.gameStarted) {
+    move();
+    wrapAround();
+    checkMonsterCaught();
+    updateUI();
+  }
 };
-
-timer = setInterval(() => {
-  elapsedTime += 1;
-  document.getElementById("timer").innerHTML = SECONDS_PER_ROUND - elapsedTime;
-}, 1000);
 
 var render = function() {
   if (bgReady) {
@@ -145,11 +153,15 @@ var render = function() {
     ctx.drawImage(monsterImage, monsterX, monsterY);
   }
 
-  const isOutOfTime = SECONDS_PER_ROUND - elapsedTime <= 0;
+  const isGameOver = SECONDS_PER_ROUND - elapsedTime <= 0;
 
-  if (isOutOfTime) {
-    stopClock()
-    ctx.fillText(`Hi GAME OVER!!!`, 20, 100);
+  if (isGameOver) {
+    stopClock();
+    ctx.font = "20px Georgia";
+    ctx.fillStyle = "black";
+    ctx.fillRect(180, 200, 150, 100);
+    ctx.fillStyle = "#FF0000";
+    ctx.fillText("Game Over!", 200, 250);
   } else {
     ctx.fillText(
       `Seconds Remaining: ${SECONDS_PER_ROUND - elapsedTime}`,
