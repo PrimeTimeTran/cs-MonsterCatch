@@ -27,7 +27,7 @@ const defaultState = {
     user: null,
     score: null
   },
-  gameHistory: []
+  topScores: []
 };
 
 function getAppState() {
@@ -87,13 +87,14 @@ function wrapAround() {
 }
 
 function updateScores() {
-  console.log('updateScores', updateScores)
   score += 1;
   const appState = getAppState();
   const newHighScore = score > appState.currentHighScore.score;
   if (newHighScore) {
+    // appState.topScores.g(appState.currentHighScore)
     appState.currentHighScore = {
       score: score,
+      date: new Date(),
       user: appState.currentUser || "Anonymous"
     };
     save(appState);
@@ -121,18 +122,29 @@ function updateUI() {
   const appState = getAppState();
   const highScore = appState.currentHighScore.score;
   const user = appState.currentHighScore.user;
+  const scoresHTML = appState.topScores.map((score) => {
+    return `<li> ${score.user}${score.score}</li>`
+  })
   document.getElementById("highscore").innerHTML = `${user} : ${highScore}`;
   document.getElementById("timer").innerHTML = SECONDS_PER_ROUND - elapsedTime;
+  document.getElementById("topScores").innerHTML = scoresHTML.join('')
 }
 
 const update = function() {
   const isGameOver = SECONDS_PER_ROUND - elapsedTime <= 0;
   const appState = getAppState();
   if (!appState.currentUser) return;
+  if (appState.gameStarted == false) {
+    return
+  }
   if (isGameOver) {
+    appState.topScores.push({
+      score: score,
+      date: new Date(),
+      user: appState.currentUser
+    })
     appState.gameStarted = false;
     save(appState);
-    return;
   }
   if (appState.gameStarted) {
     move();
