@@ -57,33 +57,17 @@ function startGame() {
 }
 
 function move() {
-  if (38 in keysDown) {
-    heroY -= 5;
-  }
-  if (40 in keysDown) {
-    heroY += 5;
-  }
-  if (37 in keysDown) {
-    heroX -= 5;
-  }
-  if (39 in keysDown) {
-    heroX += 5;
-  }
+  if (38 in keysDown) heroY -= 5;
+  if (40 in keysDown) heroY += 5;
+  if (37 in keysDown) heroX -= 5;
+  if (39 in keysDown) heroX += 5;
 }
 
 function wrapAround() {
-  if (heroX <= 0) {
-    heroX = canvas.width - 10;
-  }
-  if (heroX >= canvas.width) {
-    heroX = 0;
-  }
-  if (heroY <= 0) {
-    heroY = canvas.height - 10;
-  }
-  if (heroY >= canvas.height) {
-    heroY = 0;
-  }
+  if (heroX <= 0) heroX = canvas.width - 10;
+  if (heroX >= canvas.width) heroX = 0;
+  if (heroY <= 0) heroY = canvas.height - 10;
+  if (heroY >= canvas.height) heroY = 0;
 }
 
 function updateScores() {
@@ -91,7 +75,6 @@ function updateScores() {
   const appState = getAppState();
   const newHighScore = score > appState.currentHighScore.score;
   if (newHighScore) {
-    // appState.topScores.g(appState.currentHighScore)
     appState.currentHighScore = {
       score: score,
       date: new Date(),
@@ -105,13 +88,13 @@ function updateScores() {
 }
 
 function checkMonsterCaught() {
-  const heroCaughtMonster =
+  const monsterCaught =
     heroX <= monsterX + 32 &&
     monsterX <= heroX + 32 &&
     heroY <= monsterY + 32 &&
     monsterY <= heroY + 32;
 
-  if (heroCaughtMonster) updateScores();
+  if (monsterCaught) updateScores();
 }
 
 function stopClock() {
@@ -122,27 +105,25 @@ function updateUI() {
   const appState = getAppState();
   const highScore = appState.currentHighScore.score;
   const user = appState.currentHighScore.user;
-  const scoresHTML = appState.topScores.map((score) => {
-    return `<li> ${score.user}${score.score}</li>`
-  })
+  let scoresHTML = '<h3>History</h3>'
+  appState.topScores.map(score => {
+    scoresHTML +=`<li> ${score.user}${score.score}</li>`;
+  });
   document.getElementById("highscore").innerHTML = `${user} : ${highScore}`;
   document.getElementById("timer").innerHTML = SECONDS_PER_ROUND - elapsedTime;
-  document.getElementById("topScores").innerHTML = scoresHTML.join('')
+  document.getElementById("topScores").innerHTML = scoresHTML 
 }
 
 const update = function() {
   const isGameOver = SECONDS_PER_ROUND - elapsedTime <= 0;
   const appState = getAppState();
-  if (!appState.currentUser) return;
-  if (appState.gameStarted == false) {
-    return
-  }
+  if (appState.gameStarted == false) return;
   if (isGameOver) {
     appState.topScores.push({
       score: score,
       date: new Date(),
       user: appState.currentUser
-    })
+    });
     appState.gameStarted = false;
     save(appState);
   }
@@ -152,9 +133,10 @@ const update = function() {
     checkMonsterCaught();
     updateUI();
   }
+  
 };
 
-var render = function() {
+const render = function() {
   if (bgReady) {
     ctx.drawImage(bgImage, 0, 0);
   }
@@ -183,7 +165,7 @@ var render = function() {
   }
 };
 
-var w = window;
+const w = window;
 requestAnimationFrame =
   w.requestAnimationFrame ||
   w.webkitRequestAnimationFrame ||
@@ -227,7 +209,7 @@ function setupKeyboardListeners() {
   );
 }
 
-var main = function() {
+const main = function() {
   update();
   render();
   requestAnimationFrame(main);

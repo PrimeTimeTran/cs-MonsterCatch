@@ -23,16 +23,36 @@ canvas {
   font-size: 30px;
 }
 
-footer {
-  height: 100px;  
-  margin-top: 14%;
+.fixed-bottom > a {
+  margin-left: 10px;
+}
+
+.fixed-bottom {
   display: flex;
   color: white;
+  min-height: 100px;
   align-items: center;
   justify-content: center;
   background-color: black;
 }
 
-footer > a {
-  margin-left: 10px;
+button {
+  min-width: 75px;
+}
+
+ul {
+  top: 200px;
+  width: 400px;
+  right: 100px;
+  height: 60%;
+  display: flex;
+  padding: 25px;
+  list-style: none;
+  position: absolute;
+  overflow-y: scroll;
+  align-items: center;
+  border-radius: 25px;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid black;
 }

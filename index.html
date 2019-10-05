@@ -11,41 +11,38 @@
 </head>
 
 <body>
-  <nav>
+  <nav class="navbar bg-dark text-light">
     <div class="col">
       <h3>Score</h3>
-      <p id="score">0</p>
-
+      <p id="score"></p>
     </div>
     <div class="col">
       <h3>Timer</h3>
-      <p id="timer">10</p>
-
+      <p id="timer">10</p>  
     </div>
     <div class="col">
-      <h3>High Scores</h3>
+      <h3>High Score</h3>
       <p id="highscore">20</p>
-    </div>
-    <div class="col">
-      <h3>Username</h3>
-      <input id="username" type="text">
-      <button onclick="startGame()">
-          Sign In
-      </button>
     </div>
     <div class="col">
       <button onclick="startGame()">
         Start
       </button>
     </div>
+    <div class="col">
+        <input id="username" type="text" placeholder="Username">
+      <button onclick="startGame()">
+        Sign In
+      </button>
+    </div>
   </nav>
   <ul id="topScores">
-
   </ul>
   <script src="game.js"></script>
-  <footer>
+
+  <nav class="navbar navbar-light fixed-bottom">
     Made with ❤️ by <a href="https://www.github.com/PrimeTimeTran">PrimeTimeTran</a>
-  </footer>
+    </footer>
 </body>
 
 
